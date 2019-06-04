@@ -1,6 +1,7 @@
 package gradleSurvey;
 //Rory Welch & Jacob Scott
 //June 14 2019
+//Google Survey
 import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
@@ -54,19 +55,22 @@ public class jframe extends JFrame implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == b1){
-			//Search for textfield link, and
-			if(true /*textfield link is valid*/){
-				collectData();
-				tf1.setText("Success!");
-				try {
-					validateEmails();
-				} catch (FileNotFoundException e1) {
-					e1.printStackTrace();
+			String[] items = tf1.getText().split("/");
+			for(int i = 0; i < items.length; i ++) {
+				if(items[i].equals("d")) {
+					//optional test link?? - here
+					collectData(items[i+1]);
+					tf1.setText("Success!");
+					try {
+						validateEmails();
+					} catch (FileNotFoundException e1) {
+						e1.printStackTrace();
+					}
+					columnScreen();
 				}
-				columnScreen();
-			} else {
-				tf1.setText("That link was not valid, check that everything should work.");
 			}
+			tf1.setText("That link was not valid, check that everything should work.");
+			
 		} else if (e.getSource() == b2){
 			for(int i = 0; i < 1; /*column name array.length*/ i++){
 				if(tf2.getText().toLowerCase().equals("columnNameArray[i]".toLowerCase())){
@@ -92,7 +96,7 @@ public class jframe extends JFrame implements ActionListener{
 		} 
 	
 	}
-	public static void collectData(){
+	public static void collectData(String spreadsheetID){
 		//from google
 	}
 	
