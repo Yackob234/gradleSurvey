@@ -125,12 +125,11 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 	public List<List<Object>> collectData(String spreadsheetID, String num) throws GeneralSecurityException, IOException{
 		int numm=Integer.parseInt(num);
 		char rangeEnd = checkLetter(numm);
-		String rangeEndString = rangeEnd + "";
 		
 		final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 		    
-	    final String range = "Form Responses 1!B1:";
-	    range.equals(range + rangeEndString);
+	    String range = "Form Responses 1!B1:";
+	    range += rangeEnd;
 	    
 	    Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
 	    		.setApplicationName(APPLICATION_NAME)
