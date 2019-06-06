@@ -36,7 +36,7 @@ import javax.swing.SwingUtilities;
 
 public class SheetsQuickstart extends JFrame implements ActionListener {
 	
-	JTextField tf1, tf2;
+	JTextField tf1, tf1b, tf2;
 	JLabel l1, l1b, l1c, l3;
 	JButton b1, b2, bCheckbox, bMultiChoice, bLinearScale;
 	JSlider s1;
@@ -53,15 +53,18 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		l1b.setBounds(WIDTH/2-300, HEIGHT*3/4, 600, 25);
 		tf1 = new JTextField("Enter your URL for the Google Sheet");
 		tf1.setBounds(WIDTH/2-250, HEIGHT/4, 500, 25);
+		tf1b = new JTextField("Additionally, Provide the number of questions, Including the username Question");
+		tf1b.setBounds(WIDTH/2-250, HEIGHT/4 + 50, 500, 25);
 		l1c = new JLabel("Make sure to copy update.txt into the folder, GoogleSurvey");
-		l1c.setBounds(WIDTH/2-250, HEIGHT/3, 500, 25);
+		l1c.setBounds(WIDTH/2-250, HEIGHT/3+50, 500, 25);
 		b1 = new JButton("Confirm");
-		b1.setBounds((WIDTH/2-50), (HEIGHT/2)-25, 100, 50);
+		b1.setBounds((WIDTH/2-50), (HEIGHT/2)+25, 100, 50);
 		b1.addActionListener(this);
 		add(l1b);
 		add(l1);
 		add(b1);
 		add(tf1);
+		add(tf1b);
 		add(l1c);
 		setSize(WIDTH, HEIGHT);
 		setLayout(null);
@@ -71,13 +74,18 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 	
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e)  {
 		if(e.getSource() == b1){
 			String[] items = tf1.getText().split("/");
 			for(int i = 0; i < items.length; i ++) {
 				if(items[i].equals("d")) {
 					//optional test link?? - here
-					collectData(items[i+1]);
+					try {
+						collectData(items[i+1], tf1b.getText());
+					} catch (GeneralSecurityException | IOException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
 					tf1.setText("Success!");
 					try {
 						validateEmails();
@@ -114,8 +122,34 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		} 
 	
 	}
-	public static void collectData(String spreadsheetID){
-		//from google
+	public List<List<Object>> collectData(String spreadsheetID, String num) throws GeneralSecurityException, IOException{
+		int numm=Integer.parseInt(num);
+		char rangeEnd = checkLetter(numm);
+		String rangeEndString = rangeEnd + "";
+		
+		final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+		    
+	    final String range = "Form Responses 1!B1:";
+	    range.equals(range + rangeEndString);
+	    
+	    Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+	    		.setApplicationName(APPLICATION_NAME)
+	            .build();
+        ValueRange response = service.spreadsheets().values()
+                .get(spreadsheetID, range)
+                .execute();
+        List<List<Object>> values = response.getValues();
+        if (values == null || values.isEmpty()) {
+            tf2.setText("The sheet is empty");
+        } else {
+        	tf2.setText("Success");
+            for (List row : values) {
+                // Print columns A and E, which correspond to indices 0 and 4.
+                System.out.printf("%s, %s\n", row.get(0), row.get(4));
+            }
+            
+        }
+        return values;
 	}
 	
 	public static void validateEmails() throws FileNotFoundException{
@@ -158,10 +192,14 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 	public void columnScreen(){ // displays the second screen, where the user picks the column
 		b1.setVisible(false);
 		tf1.setVisible(false);
+		tf1b.setVisible(false);
 		l1b.setVisible(false);
+		l1c.setVisible(false);
 		remove(b1);
 		remove(tf1);
+		remove(tf1b);
 		remove(l1b);
+		remove(l1c);
 		
 		tf2 = new JTextField("Enter the title of the Question you would like data for.");
 		tf2.setBounds(WIDTH/2-250, HEIGHT/4, 500, 25);
@@ -257,26 +295,71 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
      */
     public static void main(String... args) throws IOException, GeneralSecurityException, FileNotFoundException {
         // Build a new authorized API client service.
-    	SwingUtilities.invokeLater(()->new jframe());
+    	SwingUtilities.invokeLater(()->new SheetsQuickstart());
     	
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        final String spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
-        final String range = "Class Data!A2:E";
-        Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-                .setApplicationName(APPLICATION_NAME)
-                .build();
-        ValueRange response = service.spreadsheets().values()
-                .get(spreadsheetId, range)
-                .execute();
-        List<List<Object>> values = response.getValues();
-        if (values == null || values.isEmpty()) {
-            System.out.println("No data found.");
-        } else {
-            System.out.println("Name, Major");
-            for (List row : values) {
-                // Print columns A and E, which correspond to indices 0 and 4.
-                System.out.printf("%s, %s\n", row.get(0), row.get(4));
-            }
-        }
+       
     }
+    
+    public static char checkLetter(int letter) {
+		switch (letter) {
+		case 0:
+			return 'a';
+		case 1:
+			return 'b';
+		case 2:
+			return 'c';
+		case 3:
+			return 'd';
+		case 4:
+			return 'e';
+		case 5:
+			return 'f';
+		case 6:
+			return 'g';
+		case 7:
+			return 'h';
+		case 8:
+			return 'i';
+		case 9:
+			return 'j';
+		case 10:
+			return 'k';
+		case 11:
+			return 'l';
+		case 12:
+			return 'm';
+		case 13:
+			return 'n';
+		case 14:
+			return 'o';
+		case 15:
+			return 'p';
+		case 16:
+			return 'q';
+		case 17:
+			return 'r';
+		case 18:
+			return 's';
+		case 19:
+			return 't';
+		case 20:
+			return 'u';
+		case 21:
+			return 'v';
+		case 22:
+			return 'w';
+		case 23:
+			return 'x';
+		case 24:
+			return 'y';
+		case 25:
+			return 'z';
+		default:
+			return 'a';
+		}
+
+	}
+
+
+
 }
