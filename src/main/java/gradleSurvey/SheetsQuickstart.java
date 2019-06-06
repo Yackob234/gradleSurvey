@@ -43,6 +43,7 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 	Student[] student;
 	int currentColumn;
 	int questionType;
+	List<List<Object>> spreadsheetData;
 	final int WIDTH = 600;
 	final int HEIGHT = 400;
 	
@@ -81,7 +82,7 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 				if(items[i].equals("d")) {
 					//optional test link?? - here
 					try {
-						collectData(items[i+1], tf1b.getText());
+						spreadsheetData = collectData(items[i+1], tf1b.getText());
 					} catch (GeneralSecurityException | IOException e2) {
 						// TODO Auto-generated catch block
 						e2.printStackTrace();
@@ -98,7 +99,7 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 			tf1.setText("That link was not valid, check that everything should work.");
 			
 		} else if (e.getSource() == b2){
-			for(int i = 0; i < 1; /*column name array.length*/ i++){
+			for(int i = 0; i < spreadsheetData.size(); i++){
 				if(tf2.getText().toLowerCase().equals("columnNameArray[i]".toLowerCase())){
 					currentColumn = i;
 					questionTypeScreen();
@@ -125,6 +126,8 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 	public List<List<Object>> collectData(String spreadsheetID, String num) throws GeneralSecurityException, IOException{
 		int numm=Integer.parseInt(num);
 		char rangeEnd = checkLetter(numm);
+		String rangeEndString = "" + rangeEnd;
+		rangeEndString = rangeEndString.toUpperCase();
 		
 		final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 		    
@@ -138,16 +141,16 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
                 .get(spreadsheetID, range)
                 .execute();
         List<List<Object>> values = response.getValues();
-        if (values == null || values.isEmpty()) {
-            tf2.setText("The sheet is empty");
-        } else {
-        	tf2.setText("Success");
-            for (List row : values) {
-                // Print columns A and E, which correspond to indices 0 and 4.
-                System.out.printf("%s, %s\n", row.get(0), row.get(4));
-            }
-            
-        }
+//        if (values == null || values.isEmpty()) {
+//            tf1.setText("The sheet is empty");
+//        } else {
+//        	tf1.setText("Success");
+//            for (List row : values) {
+//                // Print columns A and E, which correspond to indices 0 and 3.
+//                System.out.printf("%s, %s\n", row.get(0), row.get(3));
+//            }
+//            
+//        }
         return values;
 	}
 	
