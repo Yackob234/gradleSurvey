@@ -44,6 +44,8 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 	String qName;
 	int currentColumn;
 	int questionType;
+	static String[] questions;
+	static int numm;
 	List<List<Object>> spreadsheetData;
 	final int WIDTH = 600;
 	final int HEIGHT = 400;
@@ -100,29 +102,32 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 			tf1.setText("That link was not valid, check that everything should work.");
 
 		} else if (e.getSource() == b2) {
-			for (int i = 0; i < spreadsheetData.size(); i++) {
-				if (tf2.getText().toLowerCase().equals("columnNameArray[i]".toLowerCase())) {
+			boolean runOnce = true;
+			for (int i = 0; i < questions.length; i++) {
+				if (questions[i].equals(tf2.getText().toLowerCase()) && runOnce) {
 					currentColumn = i;
-					qName = "columnNameArray[i]".toLowerCase();
+					qName = tf2.getText();
+					runOnce = false;
 					questionTypeScreen();
 				} else if (tf2.getText().equals("continue")) {
 					currentColumn = i;
-					questionTypeScreen();
-				} else {
-					tf2.setText("There was no Question with that name");
-					////////Make sure to remove///////
+					runOnce = false;
 					questionTypeScreen();
 				}
 			}
+			tf2.setText("There was no Question with that name");
 
 		} else if (e.getSource() == bCheckbox) {
 			questionType = 0;
+			System.out.println("hit2");
 			checkBoxScreen(student);
 		} else if (e.getSource() == bMultiChoice) {
 			questionType = 1;
+			System.out.println("hit2");
 			multiChoiceScreen(student);
 		} else if (e.getSource() == bLinearScale) {
 			questionType = 2;
+			System.out.println("hit2");
 			linearScaleScreen(student);
 		}
 		else if(e.getSource() == b4) {
@@ -137,7 +142,8 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 
 	public List<List<Object>> collectData(String spreadsheetID, String num)
 			throws GeneralSecurityException, IOException {
-		int numm = Integer.parseInt(num);
+		numm = Integer.parseInt(num);
+		questions = new String[numm];
 		char rangeEnd = checkLetter(numm);
 		String rangeEndString = "" + rangeEnd;
 		rangeEndString = rangeEndString.toUpperCase();
@@ -145,7 +151,8 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 
 		String range = "Form Responses 1!B1:";
-		range += rangeEnd;
+		range += rangeEndString;
+		System.out.print(range);
 
 		Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
 				.setApplicationName(APPLICATION_NAME).build();
@@ -155,10 +162,10 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		// tf1.setText("The sheet is empty");
 		// } else {
 		// tf1.setText("Success");
-		// for (List row : values) {
-		// // Print columns A and E, which correspond to indices 0 and 3.
-		// System.out.printf("%s, %s\n", row.get(0), row.get(3));
-		// }
+		 for (List row : values) {
+		 // Print columns A and E, which correspond to indices 0 and 3.
+		 System.out.printf("%s, %s\n", row.get(0), row.get(3));
+		 }
 		//
 		// }
 		return values;
@@ -166,8 +173,16 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 
 	public static void validateEmails(List<List<Object>> values, Student[] students) throws FileNotFoundException {
 		students = getEmails("update.txt");
-
+		boolean ranOnce = false;
 		for (List row : values) {
+			if(!ranOnce) {
+				for(int i = 0; i < numm; i ++) {
+					row.set(i, row.get(i).toString().toLowerCase());
+					questions[i] = (String) row.get(i);
+					System.out.println(row.get(i));
+				}
+				ranOnce = true;
+			}
 			for (int i = 0; i < students.length; i++) {
 				if (row.get(0) == students[i]) {
 					students[i].valid = true;
@@ -203,14 +218,16 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		for (int i = 0; i < length; i++) {
 			stu[i] = new Student();
 			String[] items = item[i].split(",");
-			stu[i].lName = items[0];
-			stu[i].fName = items[1];
+			stu[i].lName = items[0].toLowerCase();
+			stu[i].fName = items[1].toLowerCase();
 			stu[i].sNum = items[3];
 		}
 		return stu;
 	}
 
 	public void columnScreen() { // displays the second screen, where the user picks the column
+
+		System.out.println("hit0");
 		b1.setVisible(false);
 		tf1.setVisible(false);
 		tf1b.setVisible(false);
@@ -234,6 +251,7 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 	public void questionTypeScreen() {
 		b2.setVisible(false);
 		tf2.setVisible(false);
+		tf2.setText("invalid");
 		remove(b2);
 		remove(tf2);
 
@@ -255,9 +273,11 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		add(bCheckbox);
 		add(bMultiChoice);
 		add(bLinearScale);
+		System.out.println("hit1");
 	}
 
 	public void multiChoiceScreen(Student[] students) {
+		System.out.println("hit3");
 		int totalValid = 0;
 		
 		l3.setVisible(false);
