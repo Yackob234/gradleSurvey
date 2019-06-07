@@ -118,16 +118,16 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 			tf2.setText("There was no Question with that name");
 
 		} else if (e.getSource() == bCheckbox) {
+			answerScreenPrep();
 			questionType = 0;
-			System.out.println("hit2");
 			checkBoxScreen(student);
 		} else if (e.getSource() == bMultiChoice) {
+			answerScreenPrep();
 			questionType = 1;
-			System.out.println("hit2");
 			multiChoiceScreen(student);
 		} else if (e.getSource() == bLinearScale) {
+			answerScreenPrep();
 			questionType = 2;
-			System.out.println("hit2");
 			linearScaleScreen(student);
 		}
 		else if(e.getSource() == b4) {
@@ -276,10 +276,7 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		System.out.println("hit1");
 	}
 
-	public void multiChoiceScreen(Student[] students) {
-		System.out.println("hit3");
-		int totalValid = 0;
-		
+	public void answerScreenPrep() {
 		l3.setVisible(false);
 		bCheckbox.setVisible(false);
 		bMultiChoice.setVisible(false);
@@ -289,12 +286,19 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		remove(bCheckbox);
 		remove(bMultiChoice);
 		remove(bLinearScale);
+	}
+	
+	public void multiChoiceScreen(Student[] students) {
+		System.out.println("hit3");
+		int totalValid = 0;
 
+		System.out.print(students.length);
 		for (int i = 0; i < students.length; i++) {
 			if (students[i].valid == true) {
 				totalValid++;
 			}
 		}
+		
 
 		l4 = new JLabel(qName);
 		l4.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
@@ -312,17 +316,7 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 	}
 
 	public void checkBoxScreen(Student[] students) {
-int totalValid = 0;
-		
-		l3.setVisible(false);
-		bCheckbox.setVisible(false);
-		bMultiChoice.setVisible(false);
-		bLinearScale.setVisible(false);
-		
-		remove(l3);
-		remove(bCheckbox);
-		remove(bMultiChoice);
-		remove(bLinearScale);
+		int totalValid = 0;
 
 		for (int i = 0; i < students.length; i++) {
 			if (students[i].valid == true) {
@@ -346,17 +340,7 @@ int totalValid = 0;
 	}
 
 	public void linearScaleScreen(Student[] students) {
-int totalValid = 0;
-		
-		l3.setVisible(false);
-		bCheckbox.setVisible(false);
-		bMultiChoice.setVisible(false);
-		bLinearScale.setVisible(false);
-		
-		remove(l3);
-		remove(bCheckbox);
-		remove(bMultiChoice);
-		remove(bLinearScale);
+		int totalValid = 0;
 
 		for (int i = 0; i < students.length; i++) {
 			if (students[i].valid == true) {
