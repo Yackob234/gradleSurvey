@@ -26,6 +26,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -42,6 +43,7 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 	JSlider s1;
 	Student[] student;
 	String qName;
+	int qNum;
 	int currentColumn;
 	int questionType;
 	static String[] questions;
@@ -92,7 +94,7 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 					}
 					tf1.setText("Success!");
 					try {
-						validateEmails(spreadsheetData, student);
+						student = validateEmails(spreadsheetData, student);
 					} catch (FileNotFoundException e1) {
 						e1.printStackTrace();
 					}
@@ -107,6 +109,7 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 				if (questions[i].equals(tf2.getText().toLowerCase()) && runOnce) {
 					currentColumn = i;
 					qName = tf2.getText();
+					qNum = i +1;
 					runOnce = false;
 					questionTypeScreen();
 				} else if (tf2.getText().equals("continue")) {
@@ -118,19 +121,18 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 			tf2.setText("There was no Question with that name");
 
 		} else if (e.getSource() == bCheckbox) {
-			answerScreenPrep();
 			questionType = 0;
+			System.out.println("hit2");
 			checkBoxScreen(student);
 		} else if (e.getSource() == bMultiChoice) {
-			answerScreenPrep();
 			questionType = 1;
-			multiChoiceScreen(student);
+			System.out.println("hit2");
+			multiChoiceScreen(student, spreadsheetData);
 		} else if (e.getSource() == bLinearScale) {
-			answerScreenPrep();
 			questionType = 2;
+			System.out.println("hit2");
 			linearScaleScreen(student);
-		}
-		else if(e.getSource() == b4) {
+		} else if (e.getSource() == b4) {
 			columnScreen();
 			remove(b4);
 			remove(l4);
@@ -162,21 +164,21 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		// tf1.setText("The sheet is empty");
 		// } else {
 		// tf1.setText("Success");
-		 for (List row : values) {
-		 // Print columns A and E, which correspond to indices 0 and 3.
-		 System.out.printf("%s, %s\n", row.get(0), row.get(3));
-		 }
+		for (List row : values) {
+			// Print columns A and E, which correspond to indices 0 and 3.
+			System.out.printf("%s, %s\n", row.get(0), row.get(3));
+		}
 		//
 		// }
 		return values;
 	}
-
-	public static void validateEmails(List<List<Object>> values, Student[] students) throws FileNotFoundException {
+////////////////////////////////////Not Working Need to fix//////////////////////////////////
+	public static Student[] validateEmails(List<List<Object>> values, Student[] students) throws FileNotFoundException {
 		students = getEmails("update.txt");
 		boolean ranOnce = false;
 		for (List row : values) {
-			if(!ranOnce) {
-				for(int i = 0; i < numm; i ++) {
+			if (!ranOnce) {
+				for (int i = 0; i < numm; i++) {
 					row.set(i, row.get(i).toString().toLowerCase());
 					questions[i] = (String) row.get(i);
 					System.out.println(row.get(i));
@@ -184,12 +186,15 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 				ranOnce = true;
 			}
 			for (int i = 0; i < students.length; i++) {
-				if (row.get(0) == students[i]) {
+				if ((String) row.get(0) == students[i].lName.substring(0, 3) + students[i].fName.substring(0, 3)
+						+ students[i].sNum.substring(students[i].sNum.length() - 3, students[i].sNum.length() - 1)) {
 					students[i].valid = true;
 				}
+				System.out.println(students[i].fName + students[i].lName + students[i].sNum +students[i].valid);
 			}
 
 		}
+		return students;
 	}
 
 	public static Student[] getEmails(String fileName) throws FileNotFoundException {
@@ -276,63 +281,67 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		System.out.println("hit1");
 	}
 
-	public void answerScreenPrep() {
+	public void multiChoiceScreen(Student[] students, List<List<Object>> values) {
+		System.out.println("hit3");
+		int totalValid = 0;
+
 		l3.setVisible(false);
 		bCheckbox.setVisible(false);
 		bMultiChoice.setVisible(false);
 		bLinearScale.setVisible(false);
-		
+
 		remove(l3);
 		remove(bCheckbox);
 		remove(bMultiChoice);
 		remove(bLinearScale);
-	}
-	
-	public void multiChoiceScreen(Student[] students) {
-		System.out.println("hit3");
-		int totalValid = 0;
+		
+		Vector <String> responses = new Vector();
 
-		System.out.print(students.length);
-		for (int i = 0; i < students.length; i++) {
-			if (students[i].valid == true) {
-				totalValid++;
-			}
+		for (List row : values) {
+				responses.add((String) row.get(qNum-1)+"x");
+		}
+		for (int i = 0; i <students.length;i++) {
+			System.out.println(students[i].valid);
 		}
 		
-
+		System.out.println(responses);
 		l4 = new JLabel(qName);
 		l4.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
 		l4b = new JLabel("Total Valid Entries: " + totalValid);
 		l4b.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 25, 500, 25);
-		
+
 		b4 = new JButton("Done");
 		b4.setBounds((WIDTH / 2 - 50), (HEIGHT / 2) + 25, 100, 50);
 		b4.addActionListener(this);
-		
+
 		add(l4);
 		add(l4b);
 		add(b4);
-		
+
 	}
 
 	public void checkBoxScreen(Student[] students) {
 		int totalValid = 0;
 
-		for (int i = 0; i < students.length; i++) {
-			if (students[i].valid == true) {
-				totalValid++;
-			}
-		}
+		l3.setVisible(false);
+		bCheckbox.setVisible(false);
+		bMultiChoice.setVisible(false);
+		bLinearScale.setVisible(false);
+
+		remove(l3);
+		remove(bCheckbox);
+		remove(bMultiChoice);
+		remove(bLinearScale);
 
 		l4 = new JLabel(qName);
 		l4.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
 		l4b = new JLabel("Total Valid Entries: " + totalValid);
 		l4b.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 25, 500, 25);
-		
+
 		b4 = new JButton("Done");
 		b4.setBounds((WIDTH / 2 + 100), (HEIGHT / 2) + 25, 100, 50);
 		b4.addActionListener(this);
-		
+
 		add(l4);
 		add(l4b);
 		add(b4);
@@ -342,25 +351,29 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 	public void linearScaleScreen(Student[] students) {
 		int totalValid = 0;
 
-		for (int i = 0; i < students.length; i++) {
-			if (students[i].valid == true) {
-				totalValid++;
-			}
-		}
+		l3.setVisible(false);
+		bCheckbox.setVisible(false);
+		bMultiChoice.setVisible(false);
+		bLinearScale.setVisible(false);
+
+		remove(l3);
+		remove(bCheckbox);
+		remove(bMultiChoice);
+		remove(bLinearScale);
 
 		l4 = new JLabel(qName);
 		l4.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
 		l4b = new JLabel("Total Valid Entries: " + totalValid);
 		l4b.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 25, 500, 25);
-		
+
 		b4 = new JButton("Done");
 		b4.setBounds((WIDTH / 2 + 100), (HEIGHT / 2) + 25, 100, 50);
 		b4.addActionListener(this);
-		
+
 		add(l4);
 		add(l4b);
 		add(b4);
-		
+
 	}
 
 	private static final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
