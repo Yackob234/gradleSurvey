@@ -5,5 +5,5 @@ public class Student {
 	String fName = "";
     String lName = "";
 	String sNum = "";
-	boolean valid = false;
+	boolean valid = true;
 }

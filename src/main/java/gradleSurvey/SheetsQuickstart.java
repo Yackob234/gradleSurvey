@@ -186,9 +186,9 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 				ranOnce = true;
 			}
 			for (int i = 0; i < students.length; i++) {
-				if ((String) row.get(0) == students[i].lName.substring(0, 3) + students[i].fName.substring(0, 3)
-						+ students[i].sNum.substring(students[i].sNum.length() - 3, students[i].sNum.length() - 1)) {
-					students[i].valid = true;
+				if (row.get(0).equals(students[i].lName.substring(0, 3) + students[i].fName.substring(0, 3)
+						+ students[i].sNum.substring(students[i].sNum.length() - 3, students[i].sNum.length() - 1))) {
+					students[i].valid = false;
 				}
 				System.out.println(students[i].fName + students[i].lName + students[i].sNum +students[i].valid);
 			}
