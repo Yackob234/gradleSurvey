@@ -42,6 +42,7 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 	JButton b1, b2, bCheckbox, bMultiChoice, bLinearScale, b4;
 	JSlider s1;
 	Student[] student;
+	usernames[] user;
 	String qName;
 	int qNum;
 	int currentColumn;
@@ -94,7 +95,8 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 					}
 					tf1.setText("Success!");
 					try {
-						student = validateEmails(spreadsheetData, student);
+						user = userLogin(spreadsheetData);
+						user = validateEmails(spreadsheetData, student, user);
 					} catch (FileNotFoundException e1) {
 						e1.printStackTrace();
 					}
@@ -109,7 +111,7 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 				if (questions[i].equals(tf2.getText().toLowerCase()) && runOnce) {
 					currentColumn = i;
 					qName = tf2.getText();
-					qNum = i +1;
+					qNum = i + 1;
 					runOnce = false;
 					questionTypeScreen();
 				} else if (tf2.getText().equals("continue")) {
@@ -127,13 +129,17 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		} else if (e.getSource() == bMultiChoice) {
 			questionType = 1;
 			System.out.println("hit2");
-			multiChoiceScreen(student, spreadsheetData);
+			multiChoiceScreen(user, spreadsheetData);
 		} else if (e.getSource() == bLinearScale) {
 			questionType = 2;
 			System.out.println("hit2");
 			linearScaleScreen(student);
 		} else if (e.getSource() == b4) {
 			columnScreen();
+			b4.setVisible(false);
+			l4.setVisible(false);
+			l4b.setVisible(false);
+			l4c.setVisible(false);
 			remove(b4);
 			remove(l4);
 			remove(l4b);
@@ -166,35 +172,59 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		// tf1.setText("Success");
 		for (List row : values) {
 			// Print columns A and E, which correspond to indices 0 and 3.
-			System.out.printf("%s, %s\n", row.get(0), row.get(3));
+			// System.out.printf("%s, %s\n", row.get(0), row.get(3));
 		}
 		//
 		// }
 		return values;
 	}
-////////////////////////////////////Not Working Need to fix//////////////////////////////////
-	public static Student[] validateEmails(List<List<Object>> values, Student[] students) throws FileNotFoundException {
+
+	public static usernames[] userLogin(List<List<Object>> values) {
+		Vector<String> names = new Vector();
+
+		for (List row : values) {
+			names.add((String) row.get(0));
+		}
+		names.remove(0);
+		usernames[] user = new usernames[names.size()];
+		for (int i = 0; i < user.length; i++) {
+			user[i] = new usernames();
+			user[i].Username = names.get(i);
+			System.out.println(user[i].Username);
+		}
+		return user;
+	}
+
+	public static usernames[] validateEmails(List<List<Object>> values, Student[] students, usernames[] user)
+			throws FileNotFoundException {
 		students = getEmails("update.txt");
 		boolean ranOnce = false;
+
 		for (List row : values) {
 			if (!ranOnce) {
 				for (int i = 0; i < numm; i++) {
 					row.set(i, row.get(i).toString().toLowerCase());
 					questions[i] = (String) row.get(i);
-					System.out.println(row.get(i));
+					// System.out.println(row.get(i));
 				}
 				ranOnce = true;
 			}
-			for (int i = 0; i < students.length; i++) {
-				if (row.get(0).equals(students[i].lName.substring(0, 3) + students[i].fName.substring(0, 3)
-						+ students[i].sNum.substring(students[i].sNum.length() - 3, students[i].sNum.length() - 1))) {
-					students[i].valid = false;
+			String email;
+			for (int i = 0; i < user.length; i++) {
+				for (int j = 0; j < students.length; j++) {
+					System.out.println(students[j].lName.substring(0, 4) + students[j].fName.substring(0, 4)
+							+ students[j].sNum.substring(students[j].sNum.length() - 3, students[j].sNum.length()));
+					if (user[i].Username.contentEquals(students[j].lName.substring(0, 4)
+							+ students[j].fName.substring(0, 4)
+							+ students[j].sNum.substring(students[j].sNum.length() - 3, students[j].sNum.length()))) {
+						user[i].valid = true;
+					}
 				}
-				System.out.println(students[i].fName + students[i].lName + students[i].sNum +students[i].valid);
+				System.out.println(user[i].valid);
 			}
 
 		}
-		return students;
+		return user;
 	}
 
 	public static Student[] getEmails(String fileName) throws FileNotFoundException {
@@ -281,10 +311,15 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		System.out.println("hit1");
 	}
 
-	public void multiChoiceScreen(Student[] students, List<List<Object>> values) {
-		System.out.println("hit3");
+	public void multiChoiceScreen(usernames[] user, List<List<Object>> values) {
 		int totalValid = 0;
+		for (int i = 0; i < user.length; i++) {
+			if (user[i].valid == true) {
+				totalValid++;
+			}
+		}
 
+		System.out.println("hit3");
 		l3.setVisible(false);
 		bCheckbox.setVisible(false);
 		bMultiChoice.setVisible(false);
@@ -294,16 +329,22 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		remove(bCheckbox);
 		remove(bMultiChoice);
 		remove(bLinearScale);
-		
-		Vector <String> responses = new Vector();
+
+		Vector<String> responses = new Vector();
 
 		for (List row : values) {
-				responses.add((String) row.get(qNum-1)+"x");
+			responses.add((String) row.get(qNum - 1));
 		}
-		for (int i = 0; i <students.length;i++) {
-			System.out.println(students[i].valid);
+
+		responses.remove(0);
+
+		for (int i = 0; i < user.length; i++) {
+			if (user[i].valid == false) {
+				responses.set(i, null);
+			}
+
 		}
-		
+
 		System.out.println(responses);
 		l4 = new JLabel(qName);
 		l4.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
