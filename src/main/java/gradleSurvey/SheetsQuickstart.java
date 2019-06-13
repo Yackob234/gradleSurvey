@@ -32,7 +32,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
@@ -55,14 +54,15 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 	final int HEIGHT = 400;
 
 	SheetsQuickstart() {
-		l1 = new JLabel("Welcome to Jacob's and Rory's Medway Polling System!");
+		l1 = new JLabel("Welcome to Jacob and Rory's Medway Polling System!");
 		l1.setBounds(WIDTH / 2 - 175, HEIGHT / 8, 350, 25);
 		l1b = new JLabel(
 				"Make sure to make the sheet public, and not apart of the TVDSB school board so anyone can access it");
 		l1b.setBounds(WIDTH / 2 - 300, HEIGHT * 3 / 4, 600, 25);
-		tf1 = new JTextField("Enter your URL for the Google Sheet");
+		tf1 = new JTextField(
+				"https://docs.google.com/spreadsheets/d/1rrV69Qc-gmfagLKP2AII1xjrWqui6m1ejPeUHuvbrY0/edit#gid=1206381474");
 		tf1.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
-		tf1b = new JTextField("Additionally, Provide the number of questions, Including the username Question");
+		tf1b = new JTextField("5");
 		tf1b.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 50, 500, 25);
 		l1c = new JLabel("Make sure to copy update.txt into the folder, GoogleSurvey");
 		l1c.setBounds(WIDTH / 2 - 250, HEIGHT / 3 + 50, 500, 25);
@@ -124,19 +124,17 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 			tf2.setText("There was no Question with that name");
 
 		} else if (e.getSource() == bCheckbox) {
-			answerScreenPrep();
 			questionType = 0;
-			System.out.println("hit2");
-			checkBoxScreen(student);
+			answerScreenPrep();
+			checkBoxScreen(student, spreadsheetData);
 		} else if (e.getSource() == bMultiChoice) {
-			answerScreenPrep();
 			questionType = 1;
-			System.out.println("hit2");
-			multiChoiceScreen(user, spreadsheetData);
-		} else if (e.getSource() == bLinearScale) {
 			answerScreenPrep();
+			multiChoiceScreen(user, spreadsheetData);
+			
+		} else if (e.getSource() == bLinearScale) {
 			questionType = 2;
-			System.out.println("hit2");
+			answerScreenPrep();
 			linearScaleScreen(student, spreadsheetData);
 		} else if (e.getSource() == b4) {
 			columnScreen();
@@ -144,12 +142,14 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 			l4.setVisible(false);
 			l4b.setVisible(false);
 			l4c.setVisible(false);
-			l4d.setVisible(false);
 			remove(b4);
 			remove(l4);
 			remove(l4b);
 			remove(l4c);
-			remove(l4d);
+			if(questionType==2) {
+				l4d.setVisible(false);
+				remove(l4d);
+			}
 		}
 
 	}
@@ -218,12 +218,20 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 			String email;
 			for (int i = 0; i < user.length; i++) {
 				for (int j = 0; j < students.length; j++) {
-					System.out.println(students[j].lName.substring(0, 4) + students[j].fName.substring(0, 4)
-							+ students[j].sNum.substring(students[j].sNum.length() - 3, students[j].sNum.length()));
-					if (user[i].Username.contentEquals(students[j].lName.substring(0, 4)
-							+ students[j].fName.substring(0, 4)
-							+ students[j].sNum.substring(students[j].sNum.length() - 3, students[j].sNum.length()))) {
+					int fNameLength = 4;
+					if(students[j].fName.length() < 4) {
+						fNameLength = students[j].fName.length();
+					}
+					int lNameLength = 4;
+					if(students[j].lName.length() < 4) {
+						lNameLength = students[j].lName.length();
+					}
+					
+					if (user[i].Username.contentEquals(students[j].lName.substring(0, lNameLength)
+							+ students[j].fName.substring(0, fNameLength)
+							+ students[j].sNum.substring(students[j].sNum.length() - 3, students[j].sNum.length())) && students[j].used == false) {
 						user[i].valid = true;
+						students[j].used = true;
 					}
 				}
 				System.out.println(user[i].valid);
@@ -232,6 +240,7 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		}
 		return user;
 	}
+
 
 	public static Student[] getEmails(String fileName) throws FileNotFoundException {
 
@@ -289,6 +298,28 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		add(b2);
 	}
 
+public void answerScreenPrep() {
+		l3.setVisible(false);
+		bCheckbox.setVisible(false);
+		bMultiChoice.setVisible(false);
+		bLinearScale.setVisible(false);
+		
+		remove(l3);
+		remove(bCheckbox);
+		remove(bMultiChoice);
+		remove(bLinearScale);
+		
+		l4 = new JLabel(qName);
+		l4.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
+		b4 = new JButton("Done");
+		b4.setBounds((WIDTH / 2 + 100), (HEIGHT / 2) + 25, 100, 50);
+		b4.addActionListener(this);
+		add(l4);
+		add(b4);
+	}
+
+
+
 	public void questionTypeScreen() {
 		b2.setVisible(false);
 		tf2.setVisible(false);
@@ -317,26 +348,6 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		System.out.println("hit1");
 	}
 
-	public void answerScreenPrep() {
-		l3.setVisible(false);
-		bCheckbox.setVisible(false);
-		bMultiChoice.setVisible(false);
-		bLinearScale.setVisible(false);
-		
-		remove(l3);
-		remove(bCheckbox);
-		remove(bMultiChoice);
-		remove(bLinearScale);
-		
-		l4 = new JLabel(qName);
-		l4.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
-		b4 = new JButton("Done");
-		b4.setBounds((WIDTH / 2 + 100), (HEIGHT / 2) + 25, 100, 50);
-		b4.addActionListener(this);
-		add(l4);
-		add(b4);
-	}
-	
 	public void multiChoiceScreen(usernames[] user, List<List<Object>> values) {
 		int totalValid = 0;
 		for (int i = 0; i < user.length; i++) {
@@ -345,8 +356,9 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 			}
 		}
 
-
 		Vector<String> responses = new Vector();
+		Vector<String> titles = new Vector();
+		Vector<Integer> total = new Vector();
 
 		for (List row : values) {
 			responses.add((String) row.get(qNum - 1));
@@ -354,46 +366,103 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 
 		responses.remove(0);
 
-		for (int i = 0; i < user.length; i++) {
-			if (user[i].valid == false) {
-				responses.set(i, null);
+		for (int i = 0; i < responses.size(); i++) {
+			if (!titles.contains(responses.get(i))) {
+				titles.add(responses.get(i));
 			}
+		}
 
+		for (int j = 0; j < titles.size(); j++) {
+			total.add(0);
+		}
+
+		for (int i = 0; i < user.length; i++) {
+			for (int j = 0; j < titles.size(); j++) {
+				if (user[i].valid == true) {
+					if (responses.get(i).equals(titles.get(j))) {
+						total.set(j, total.get(j) + 1);
+					}
+				}
+			}
 		}
 
 		System.out.println(responses);
-		l4 = new JLabel(qName);
-		l4.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
 		l4b = new JLabel("Total Valid Entries: " + totalValid);
 		l4b.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 25, 500, 25);
 
-		b4 = new JButton("Done");
-		b4.setBounds((WIDTH / 2 - 50), (HEIGHT / 2) + 25, 100, 50);
-		b4.addActionListener(this);
+		String answer = titles.get(0) + ": " + total.get(0);
+		for (int i = 1; i < titles.size(); i++) {
+			answer = answer + " | " + titles.get(i) + ": " + total.get(i);
+		}
 
-		add(l4);
+		l4c = new JLabel(answer);
+		l4c.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 50, 500, 25);
+
 		add(l4b);
-		add(b4);
-
+		add(l4c);
 	}
 
-	public void checkBoxScreen(Student[] students) {
+	public void checkBoxScreen(Student[] students,List<List<Object>> values) {
 		int totalValid = 0;
+		for (int i = 0; i < user.length; i++) {
+			if (user[i].valid == true) {
+				totalValid++;
+			}
+		}
 
 
-		l4 = new JLabel(qName);
-		l4.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
+		Vector<String> data = new Vector();
+		Vector<String> responses = new Vector();
+		Vector<String> titles = new Vector();
+		Vector<Integer> total = new Vector();
+
+		for (List row : values) {
+			data.add((String) row.get(qNum - 1));
+		}
+		String[] split = null;
+		for (int i = 0; i < data.size(); i++) {
+			 split = data.get(i).split(",");
+		}
+		
+		for (int i = 0; i < split.length; i++) {
+			responses.add(split[i]);
+		}
+		
+		responses.remove(0);
+
+		for (int i = 0; i < responses.size(); i++) {
+			if (!titles.contains(responses.get(i))) {
+				titles.add(responses.get(i));
+			}
+		}
+
+		for (int j = 0; j < titles.size(); j++) {
+			total.add(0);
+		}
+
+		for (int i = 0; i < responses.size(); i++) {
+			for (int j = 0; j < titles.size(); j++) {
+				if (user[i].valid == true) {
+					if (responses.get(i).equals(titles.get(j))) {
+						total.set(j, total.get(j) + 1);
+					}
+				}
+			}
+		}
+
 		l4b = new JLabel("Total Valid Entries: " + totalValid);
 		l4b.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 25, 500, 25);
 
-		b4 = new JButton("Done");
-		b4.setBounds((WIDTH / 2 + 100), (HEIGHT / 2) + 25, 100, 50);
-		b4.addActionListener(this);
+		String answer = titles.get(0) + ": " + total.get(0);
+		for (int i = 1; i < titles.size(); i++) {
+			answer = answer + " | " + titles.get(i) + ": " + total.get(i);
+		}
 
-		add(l4);
+		l4c = new JLabel(answer);
+		l4c.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 50, 500, 25);
+
 		add(l4b);
-		add(b4);
-
+		add(l4c);
 	}
 
 	public void linearScaleScreen(Student[] students, List<List<Object>> values) {
@@ -403,7 +472,7 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		Vector<String> responses = new Vector();
 		
 
-		Vector<Double> numbers = new Vector();
+		Vector<Integer> numbers = new Vector();
 		Vector<Integer> amount = new Vector();
 		boolean notFound = true;
 		
@@ -424,35 +493,45 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 						notFound = false;
 						amount.set(j, amount.get(j) + 1);
 					}
-					
 				}
 				if(notFound) {
-					numbers.add(answer);
+					numbers.add((int)answer);
 					amount.add(1);
 				}
-				
-				
 			}
 		}
 		average = average/totalValid;
 		
-		l4b = new JLabel("Total Valid Entries: " + totalValid + "<html><br></html>" + "Average Response " + average);
+		l4b = new JLabel("Total Valid Entries: " + totalValid);
 		l4b.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 25, 500, 50);
-		l4c = new JLabel("Average Response " + average);
+		l4c = new JLabel("Average Response"  + average);
 		l4c.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 50, 500, 25);
+		
+		
 		l4d = new JLabel("Responses:");
-		l4d.setBounds(WIDTH / 2 - 250, HEIGHT / 2 + 25, 500, 25);
-		System.out.print("hit22" + numbers.size());
+		l4d.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 75, 500, 25);
+		
+		String l4dS = "";
+		
+		
+		
 		for(int i = 0; i < numbers.size(); i ++) {
-			l4d.setText(l4d.getText() +"<html><br></html>" + numbers.get(i) + ": " + amount.get(i) + " responses" );
+			l4dS = l4dS + numbers.get(i) + ": " + amount.get(i) + " responses | ";
 		}
+		
+		l4d.setText(l4dS);
+		
+		System.out.print("hit22" + numbers.size());
+		
 //"\n "+
 		System.out.print("hit222");
 		add(l4b);
 
 		add(l4d);
-	//	add(l4c);
+		add(l4c);
+		
 	}
+
 
 	private static final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
 	private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
