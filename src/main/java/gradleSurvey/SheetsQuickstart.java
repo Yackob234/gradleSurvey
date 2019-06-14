@@ -39,7 +39,7 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 
 	JTextField tf1, tf1b, tf2;
 	JLabel l1, l1b, l1c, l3, l4, l4b, l4c, l4d;
-	JButton b1, b2, bCheckbox, bMultiChoice, bLinearScale, b4;
+	JButton b1, b2, bCheckbox, bMultiChoice, bLinearScale, b4, b4b;
 	JSlider s1;
 	Student[] student;
 	usernames[] user;
@@ -151,7 +151,6 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 				remove(l4d);
 			}
 		}
-
 	}
 
 	public List<List<Object>> collectData(String spreadsheetID, String num)
@@ -314,8 +313,14 @@ public void answerScreenPrep() {
 		b4 = new JButton("Done");
 		b4.setBounds((WIDTH / 2 + 100), (HEIGHT / 2) + 25, 100, 50);
 		b4.addActionListener(this);
+		
+		
+		
 		add(l4);
 		add(b4);
+
+
+		validate();
 	}
 
 
@@ -349,6 +354,11 @@ public void answerScreenPrep() {
 	}
 
 	public void multiChoiceScreen(usernames[] user, List<List<Object>> values) {
+
+		b4b = new JButton("Done");
+		b4b.setBounds((WIDTH / 2 - 100), (HEIGHT / 2) + 25, 100, 50);
+		b4b.addActionListener(this);
+		add(b4b);
 		int totalValid = 0;
 		for (int i = 0; i < user.length; i++) {
 			if (user[i].valid == true) {
@@ -513,10 +523,32 @@ public void answerScreenPrep() {
 		
 		String l4dS = "";
 		
+		for(int i = 0; i < numbers.size()-1; i ++) {
+			if(numbers.get(i) > numbers.get(i+1)) {
+				int storage = numbers.get(i);
+				numbers.set(i, numbers.get(i+1));
+				numbers.set(i+1, storage);
+				
+				storage = amount.get(i);
+				amount.set(i, amount.get(i+1));
+				amount.set(i+1, storage);
+				i=-1;
+			}
+		}
+		
+		
+		
+		
+		
+		
+		
 		
 		
 		for(int i = 0; i < numbers.size(); i ++) {
-			l4dS = l4dS + numbers.get(i) + ": " + amount.get(i) + " responses | ";
+			l4dS = l4dS + numbers.get(i) + ": " + amount.get(i) + " responses";
+			if(i + 1 != numbers.size()) {
+				l4dS = l4dS + " | ";
+			}
 		}
 		
 		l4d.setText(l4dS);
