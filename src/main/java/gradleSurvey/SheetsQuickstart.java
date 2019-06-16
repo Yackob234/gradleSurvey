@@ -40,27 +40,26 @@ import javax.swing.SwingUtilities;
 public class SheetsQuickstart extends JFrame {
 
 	Display one;
-	
-    public SheetsQuickstart(){
-    	setTitle("Slit Diffraction by Jacob Scott");
-    	setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
-    	one = new Display();
-    	add(one);
-    	//setLayout(null);
-        pack();
-       
-        setVisible(true);
-        
-    }
 
-    public static void main(String[]args){
-        SwingUtilities.invokeLater(()->new  SheetsQuickstart());
-    }	
-    
+	public SheetsQuickstart() {
+		setTitle("Survey");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		one = new Display();
+		add(one);
+		// setLayout(null);
+		pack();
+
+		setVisible(true);
+
+	}
+
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(() -> new SheetsQuickstart());
+	}
+
 }
 
-
-class Display extends JPanel implements ActionListener{
+class Display extends JPanel implements ActionListener {
 
 	JTextField tf1, tf1b, tf2;
 	JLabel l1, l1b, l1c, l3, l4, l4b, l4c, l4d;
@@ -78,7 +77,6 @@ class Display extends JPanel implements ActionListener{
 	final int WIDTH = 600;
 	final int HEIGHT = 400;
 
-	
 	public Display() {
 
 		l1 = new JLabel("Welcome to Jacob and Rory's Medway Polling System!");
@@ -101,12 +99,10 @@ class Display extends JPanel implements ActionListener{
 		add(b1);
 		add(tf1);
 		add(tf1b);
-		add(l1c); 
+		add(l1c);
 		setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		setLayout(null);
 	}
-
-	
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -158,7 +154,7 @@ class Display extends JPanel implements ActionListener{
 			questionType = 1;
 			answerScreenPrep();
 			multiChoiceScreen(user, spreadsheetData);
-			
+
 		} else if (e.getSource() == bLinearScale) {
 			questionType = 2;
 			answerScreenPrep();
@@ -173,7 +169,7 @@ class Display extends JPanel implements ActionListener{
 			remove(l4);
 			remove(l4b);
 			remove(l4c);
-			if(questionType==2) {
+			if (questionType == 2) {
 				l4d.setVisible(false);
 				remove(l4d);
 			}
@@ -192,7 +188,6 @@ class Display extends JPanel implements ActionListener{
 
 		String range = "Form Responses 1!B1:";
 		range += rangeEndString;
-		System.out.print(range);
 
 		Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
 				.setApplicationName(APPLICATION_NAME).build();
@@ -222,7 +217,6 @@ class Display extends JPanel implements ActionListener{
 		for (int i = 0; i < user.length; i++) {
 			user[i] = new usernames();
 			user[i].Username = names.get(i);
-			System.out.println(user[i].Username);
 		}
 		return user;
 	}
@@ -237,7 +231,6 @@ class Display extends JPanel implements ActionListener{
 				for (int i = 0; i < numm; i++) {
 					row.set(i, row.get(i).toString().toLowerCase());
 					questions[i] = (String) row.get(i);
-					// System.out.println(row.get(i));
 				}
 				ranOnce = true;
 			}
@@ -245,28 +238,27 @@ class Display extends JPanel implements ActionListener{
 			for (int i = 0; i < user.length; i++) {
 				for (int j = 0; j < students.length; j++) {
 					int fNameLength = 4;
-					if(students[j].fName.length() < 4) {
+					if (students[j].fName.length() < 4) {
 						fNameLength = students[j].fName.length();
 					}
 					int lNameLength = 4;
-					if(students[j].lName.length() < 4) {
+					if (students[j].lName.length() < 4) {
 						lNameLength = students[j].lName.length();
 					}
-					
+
 					if (user[i].Username.contentEquals(students[j].lName.substring(0, lNameLength)
 							+ students[j].fName.substring(0, fNameLength)
-							+ students[j].sNum.substring(students[j].sNum.length() - 3, students[j].sNum.length())) && students[j].used == false) {
+							+ students[j].sNum.substring(students[j].sNum.length() - 3, students[j].sNum.length()))
+							&& students[j].used == false) {
 						user[i].valid = true;
 						students[j].used = true;
 					}
 				}
-				System.out.println(user[i].valid);
 			}
 
 		}
 		return user;
 	}
-
 
 	public static Student[] getEmails(String fileName) throws FileNotFoundException {
 
@@ -303,7 +295,6 @@ class Display extends JPanel implements ActionListener{
 
 	public void columnScreen() { // displays the second screen, where the user picks the column
 
-		System.out.println("hit0");
 		b1.setVisible(false);
 		tf1.setVisible(false);
 		tf1b.setVisible(false);
@@ -324,33 +315,28 @@ class Display extends JPanel implements ActionListener{
 		add(b2);
 	}
 
-public void answerScreenPrep() {
+	public void answerScreenPrep() {
 		l3.setVisible(false);
 		bCheckbox.setVisible(false);
 		bMultiChoice.setVisible(false);
 		bLinearScale.setVisible(false);
-		
+
 		remove(l3);
 		remove(bCheckbox);
 		remove(bMultiChoice);
 		remove(bLinearScale);
-		
+
 		l4 = new JLabel(qName);
 		l4.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
 		b4 = new JButton("Done");
 		b4.setBounds((WIDTH / 2 + 100), (HEIGHT / 2) + 25, 100, 50);
 		b4.addActionListener(this);
-		
-		
-		
+
 		add(l4);
 		add(b4);
 
-
 		validate();
 	}
-
-
 
 	public void questionTypeScreen() {
 		b2.setVisible(false);
@@ -377,7 +363,6 @@ public void answerScreenPrep() {
 		add(bCheckbox);
 		add(bMultiChoice);
 		add(bLinearScale);
-		System.out.println("hit1");
 	}
 
 	public void multiChoiceScreen(usernames[] user, List<List<Object>> values) {
@@ -423,7 +408,6 @@ public void answerScreenPrep() {
 			}
 		}
 
-		System.out.println(responses);
 		l4b = new JLabel("Total Valid Entries: " + totalValid);
 		l4b.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 25, 500, 25);
 
@@ -439,7 +423,7 @@ public void answerScreenPrep() {
 		add(l4c);
 	}
 
-	public void checkBoxScreen(Student[] students,List<List<Object>> values) {
+	public void checkBoxScreen(Student[] students, List<List<Object>> values) {
 		int totalValid = 0;
 		for (int i = 0; i < user.length; i++) {
 			if (user[i].valid == true) {
@@ -447,25 +431,36 @@ public void answerScreenPrep() {
 			}
 		}
 
-
 		Vector<String> data = new Vector();
 		Vector<String> responses = new Vector();
 		Vector<String> titles = new Vector();
 		Vector<Integer> total = new Vector();
+		Vector<Integer> remove = new Vector();
 
 		for (List row : values) {
 			data.add((String) row.get(qNum - 1));
 		}
-		String[] split = null;
+		data.remove(0);
 		for (int i = 0; i < data.size(); i++) {
-			 split = data.get(i).split(",");
+			if (user[i].valid == false) {
+				remove.add(i);
+			}
 		}
-		
+		for (int i = 0; i < remove.size(); i++) {
+			data.remove(remove.get(i)-i);
+		}
+		String[] split = null;
+		String data1 = null;
+		for (int i = 0; i < data.size(); i++) {
+			data1 = data.toString();
+		}
+		String data2 = data1.substring(1, data1.length() - 1);
+		split = data2.split(", ");
+
 		for (int i = 0; i < split.length; i++) {
 			responses.add(split[i]);
+			System.out.println(responses.get(i));
 		}
-		
-		responses.remove(0);
 
 		for (int i = 0; i < responses.size(); i++) {
 			if (!titles.contains(responses.get(i))) {
@@ -479,10 +474,10 @@ public void answerScreenPrep() {
 
 		for (int i = 0; i < responses.size(); i++) {
 			for (int j = 0; j < titles.size(); j++) {
-				if (user[i].valid == true) {
-					if (responses.get(i).equals(titles.get(j))) {
-						total.set(j, total.get(j) + 1);
-					}
+
+				if (responses.get(i).equals(titles.get(j))) {
+					total.set(j, total.get(j) + 1);
+
 				}
 			}
 		}
@@ -507,12 +502,11 @@ public void answerScreenPrep() {
 		double average = 0;
 
 		Vector<String> responses = new Vector();
-		
 
 		Vector<Integer> numbers = new Vector();
 		Vector<Integer> amount = new Vector();
 		boolean notFound = true;
-		
+
 		for (List row : values) {
 			responses.add((String) row.get(qNum - 1));
 		}
@@ -524,73 +518,59 @@ public void answerScreenPrep() {
 				totalValid++;
 				double answer = Double.parseDouble(responses.get(i));
 				average += answer;
-				
-				for(int j = 0; j < numbers.size(); j++) {
-					if(answer == numbers.get(j)) {
+
+				for (int j = 0; j < numbers.size(); j++) {
+					if (answer == numbers.get(j)) {
 						notFound = false;
 						amount.set(j, amount.get(j) + 1);
 					}
 				}
-				if(notFound) {
-					numbers.add((int)answer);
+				if (notFound) {
+					numbers.add((int) answer);
 					amount.add(1);
 				}
 			}
 		}
-		average = average/totalValid;
-		
+		average = average / totalValid;
+
 		l4b = new JLabel("Total Valid Entries: " + totalValid);
 		l4b.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 25, 500, 50);
-		l4c = new JLabel("Average Response"  + average);
+		l4c = new JLabel("Average Response" + average);
 		l4c.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 50, 500, 25);
-		
-		
+
 		l4d = new JLabel("Responses:");
 		l4d.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 75, 500, 25);
-		
+
 		String l4dS = "";
-		
-		for(int i = 0; i < numbers.size()-1; i ++) {
-			if(numbers.get(i) > numbers.get(i+1)) {
+
+		for (int i = 0; i < numbers.size() - 1; i++) {
+			if (numbers.get(i) > numbers.get(i + 1)) {
 				int storage = numbers.get(i);
-				numbers.set(i, numbers.get(i+1));
-				numbers.set(i+1, storage);
-				
+				numbers.set(i, numbers.get(i + 1));
+				numbers.set(i + 1, storage);
+
 				storage = amount.get(i);
-				amount.set(i, amount.get(i+1));
-				amount.set(i+1, storage);
-				i=-1;
+				amount.set(i, amount.get(i + 1));
+				amount.set(i + 1, storage);
+				i = -1;
 			}
 		}
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		for(int i = 0; i < numbers.size(); i ++) {
+
+		for (int i = 0; i < numbers.size(); i++) {
 			l4dS = l4dS + numbers.get(i) + ": " + amount.get(i) + " responses";
-			if(i + 1 != numbers.size()) {
+			if (i + 1 != numbers.size()) {
 				l4dS = l4dS + " | ";
 			}
 		}
-		
+
 		l4d.setText(l4dS);
-		
-		System.out.print("hit22" + numbers.size());
-		
-//"\n "+
-		System.out.print("hit222");
+
 		add(l4b);
 
 		add(l4d);
 		add(l4c);
-		
-	}
 
+	}
 
 	private static final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
 	private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -636,7 +616,6 @@ public void answerScreenPrep() {
 	public static void main(String... args) throws IOException, GeneralSecurityException, FileNotFoundException {
 		// Build a new authorized API client service.
 		SwingUtilities.invokeLater(() -> new SheetsQuickstart());
-		
 
 	}
 
