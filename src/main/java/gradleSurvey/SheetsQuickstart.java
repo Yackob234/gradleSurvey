@@ -14,6 +14,7 @@ import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -31,11 +32,35 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-public class SheetsQuickstart extends JFrame implements ActionListener {
+public class SheetsQuickstart extends JFrame {
+
+	Display one;
+	
+    public SheetsQuickstart(){
+    	setTitle("Slit Diffraction by Jacob Scott");
+    	setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
+    	one = new Display();
+    	add(one);
+    	//setLayout(null);
+        pack();
+       
+        setVisible(true);
+        
+    }
+
+    public static void main(String[]args){
+        SwingUtilities.invokeLater(()->new  SheetsQuickstart());
+    }	
+    
+}
+
+
+class Display extends JPanel implements ActionListener{
 
 	JTextField tf1, tf1b, tf2;
 	JLabel l1, l1b, l1c, l3, l4, l4b, l4c, l4d;
@@ -53,7 +78,9 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 	final int WIDTH = 600;
 	final int HEIGHT = 400;
 
-	SheetsQuickstart() {
+	
+	public Display() {
+
 		l1 = new JLabel("Welcome to Jacob and Rory's Medway Polling System!");
 		l1.setBounds(WIDTH / 2 - 175, HEIGHT / 8, 350, 25);
 		l1b = new JLabel(
@@ -74,12 +101,12 @@ public class SheetsQuickstart extends JFrame implements ActionListener {
 		add(b1);
 		add(tf1);
 		add(tf1b);
-		add(l1c);
-		setSize(WIDTH, HEIGHT);
+		add(l1c); 
+		setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		setLayout(null);
-		setVisible(true);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
 	}
+
+	
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -609,6 +636,7 @@ public void answerScreenPrep() {
 	public static void main(String... args) throws IOException, GeneralSecurityException, FileNotFoundException {
 		// Build a new authorized API client service.
 		SwingUtilities.invokeLater(() -> new SheetsQuickstart());
+		
 
 	}
 
