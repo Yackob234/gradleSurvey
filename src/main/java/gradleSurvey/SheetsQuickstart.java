@@ -41,8 +41,9 @@ public class SheetsQuickstart extends JFrame {
 
 	Display one;
 
+	//sets up the jframe, and the panel
 	public SheetsQuickstart() {
-		setTitle("Survey");
+		setTitle("Google Survey");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		one = new Display();
 		add(one);
@@ -52,7 +53,7 @@ public class SheetsQuickstart extends JFrame {
 		setVisible(true);
 
 	}
-
+	//puts the Jframe on the EDT, and calls the frame
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(() -> new SheetsQuickstart());
 	}
@@ -78,7 +79,7 @@ class Display extends JPanel implements ActionListener {
 	final int HEIGHT = 400;
 
 	public Display() {
-
+		//loads the first page
 		l1 = new JLabel("Welcome to Jacob and Rory's Medway Polling System!");
 		l1.setBounds(WIDTH / 2 - 175, HEIGHT / 8, 350, 25);
 		l1b = new JLabel(
@@ -106,24 +107,25 @@ class Display extends JPanel implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == b1) {
+		// checks the source to see what button called the method;
+		if (e.getSource() == b1) { // searches for the url, by splitting by /d/
 			String[] items = tf1.getText().split("/");
 			for (int i = 0; i < items.length; i++) {
 				if (items[i].equals("d")) {
-					// optional test link?? - here
 					try {
 						spreadsheetData = collectData(items[i + 1], tf1b.getText());
 					} catch (GeneralSecurityException | IOException e2) {
-						// TODO Auto-generated catch block
 						e2.printStackTrace();
 					}
 					tf1.setText("Success!");
+					//if the spreadsheet exists, get logins, and validate the emails
 					try {
 						user = userLogin(spreadsheetData);
 						user = validateEmails(spreadsheetData, student, user);
 					} catch (FileNotFoundException e1) {
 						e1.printStackTrace();
 					}
+					//runs the second screen
 					columnScreen();
 				}
 			}
@@ -131,6 +133,7 @@ class Display extends JPanel implements ActionListener {
 
 		} else if (e.getSource() == b2) {
 			boolean runOnce = true;
+			//searches for the question name, then continues onto next screen
 			for (int i = 0; i < questions.length; i++) {
 				if (questions[i].equals(tf2.getText().toLowerCase()) && runOnce) {
 					currentColumn = i;
@@ -138,14 +141,13 @@ class Display extends JPanel implements ActionListener {
 					qNum = i + 1;
 					runOnce = false;
 					questionTypeScreen();
-				} else if (tf2.getText().equals("continue")) {
-					currentColumn = i;
-					runOnce = false;
-					questionTypeScreen();
-				}
+				} 
 			}
 			tf2.setText("There was no Question with that name");
 
+			/*
+			 * the next if statements, all do the same, and just run the next screen respectivly
+			 */
 		} else if (e.getSource() == bCheckbox) {
 			questionType = 0;
 			answerScreenPrep();
@@ -160,6 +162,7 @@ class Display extends JPanel implements ActionListener {
 			answerScreenPrep();
 			linearScaleScreen(student, spreadsheetData);
 		} else if (e.getSource() == b4) {
+			//loops the program back to the column screen so the user can pick a new question to look at data for
 			columnScreen();
 			b4.setVisible(false);
 			l4.setVisible(false);
@@ -178,9 +181,11 @@ class Display extends JPanel implements ActionListener {
 
 	public List<List<Object>> collectData(String spreadsheetID, String num)
 			throws GeneralSecurityException, IOException {
+		//first the ending letter of the spreadsheet is found through collecting the number of questions at the begining of the program
 		numm = Integer.parseInt(num);
 		questions = new String[numm];
 		char rangeEnd = checkLetter(numm);
+		//its then added to the range string
 		String rangeEndString = "" + rangeEnd;
 		rangeEndString = rangeEndString.toUpperCase();
 
@@ -188,21 +193,13 @@ class Display extends JPanel implements ActionListener {
 
 		String range = "Form Responses 1!B1:";
 		range += rangeEndString;
-
+		
+		
+		//this retrieves the spreadsheet and returns a List<List<Object>>
 		Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
 				.setApplicationName(APPLICATION_NAME).build();
 		ValueRange response = service.spreadsheets().values().get(spreadsheetID, range).execute();
 		List<List<Object>> values = response.getValues();
-		// if (values == null || values.isEmpty()) {
-		// tf1.setText("The sheet is empty");
-		// } else {
-		// tf1.setText("Success");
-		for (List row : values) {
-			// Print columns A and E, which correspond to indices 0 and 3.
-			// System.out.printf("%s, %s\n", row.get(0), row.get(3));
-		}
-		//
-		// }
 		return values;
 	}
 
@@ -261,7 +258,7 @@ class Display extends JPanel implements ActionListener {
 	}
 
 	public static Student[] getEmails(String fileName) throws FileNotFoundException {
-
+		//this method searches for each email in update.txt
 		File file = new File(fileName);
 		Scanner parser = new Scanner(new FileReader(file));
 
@@ -283,6 +280,8 @@ class Display extends JPanel implements ActionListener {
 			item[length - 1] = parser.nextLine();
 		}
 		Student[] stu = new Student[length];
+		
+		//splits up the line, into last name, first name, then student number
 		for (int i = 0; i < length; i++) {
 			stu[i] = new Student();
 			String[] items = item[i].split(",");
@@ -295,6 +294,7 @@ class Display extends JPanel implements ActionListener {
 
 	public void columnScreen() { // displays the second screen, where the user picks the column
 
+		//removing the old screen
 		b1.setVisible(false);
 		tf1.setVisible(false);
 		tf1b.setVisible(false);
@@ -306,6 +306,7 @@ class Display extends JPanel implements ActionListener {
 		remove(l1b);
 		remove(l1c);
 
+		//adding the new screen
 		tf2 = new JTextField("Enter the title of the Question you would like data for.");
 		tf2.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
 		b2 = new JButton("Confirm");
@@ -316,6 +317,8 @@ class Display extends JPanel implements ActionListener {
 	}
 
 	public void answerScreenPrep() {
+		//a general cleanup method, as all of the question types use these lines, the code is just condensed
+		//removing old screen
 		l3.setVisible(false);
 		bCheckbox.setVisible(false);
 		bMultiChoice.setVisible(false);
@@ -326,6 +329,7 @@ class Display extends JPanel implements ActionListener {
 		remove(bMultiChoice);
 		remove(bLinearScale);
 
+		//adding new screen
 		l4 = new JLabel(qName);
 		l4.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
 		b4 = new JButton("Done");
@@ -339,15 +343,17 @@ class Display extends JPanel implements ActionListener {
 	}
 
 	public void questionTypeScreen() {
+		//removing old screen
 		b2.setVisible(false);
 		tf2.setVisible(false);
 		tf2.setText("invalid");
 		remove(b2);
 		remove(tf2);
-
+		
+		//adding new screen
 		l3 = new JLabel("What type of Question is this?");
 		l3.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
-		// bCheckbox, bMultiChoice, bLinearScale;
+		
 		bCheckbox = new JButton("Checkbox");
 		bCheckbox.setBounds((WIDTH / 2 - 250), (HEIGHT / 2) - 25, 150, 50);
 		bCheckbox.addActionListener(this);
@@ -366,11 +372,6 @@ class Display extends JPanel implements ActionListener {
 	}
 
 	public void multiChoiceScreen(usernames[] user, List<List<Object>> values) {
-
-		b4b = new JButton("Done");
-		b4b.setBounds((WIDTH / 2 - 100), (HEIGHT / 2) + 25, 100, 50);
-		b4b.addActionListener(this);
-		add(b4b);
 		int totalValid = 0;
 		for (int i = 0; i < user.length; i++) {
 			if (user[i].valid == true) {
@@ -378,6 +379,7 @@ class Display extends JPanel implements ActionListener {
 			}
 		}
 
+		
 		Vector<String> responses = new Vector();
 		Vector<String> titles = new Vector();
 		Vector<Integer> total = new Vector();
@@ -502,29 +504,33 @@ class Display extends JPanel implements ActionListener {
 		double average = 0;
 
 		Vector<String> responses = new Vector();
-
 		Vector<Integer> numbers = new Vector();
 		Vector<Integer> amount = new Vector();
 		boolean notFound = true;
-
+		//changes the List<List<Object>> into a Vector<String>
 		for (List row : values) {
 			responses.add((String) row.get(qNum - 1));
 		}
-
+		//removes the question in the vector of responses
 		responses.remove(0);
 
 		for (int i = 0; i < user.length; i++) {
+			//if the user is valid, 
 			if (user[i].valid) {
+				//add to total valid users
 				totalValid++;
+				//change response into double, and sum it
 				double answer = Double.parseDouble(responses.get(i));
 				average += answer;
 
+				//if the number has already occured, add it to total
 				for (int j = 0; j < numbers.size(); j++) {
 					if (answer == numbers.get(j)) {
 						notFound = false;
 						amount.set(j, amount.get(j) + 1);
 					}
 				}
+				//if it hasn't, make a new int to represent it
 				if (notFound) {
 					numbers.add((int) answer);
 					amount.add(1);
@@ -533,6 +539,7 @@ class Display extends JPanel implements ActionListener {
 		}
 		average = average / totalValid;
 
+		//adding new screen
 		l4b = new JLabel("Total Valid Entries: " + totalValid);
 		l4b.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 25, 500, 50);
 		l4c = new JLabel("Average Response" + average);
@@ -543,6 +550,7 @@ class Display extends JPanel implements ActionListener {
 
 		String l4dS = "";
 
+		//sorting the list of responses
 		for (int i = 0; i < numbers.size() - 1; i++) {
 			if (numbers.get(i) > numbers.get(i + 1)) {
 				int storage = numbers.get(i);
@@ -555,7 +563,8 @@ class Display extends JPanel implements ActionListener {
 				i = -1;
 			}
 		}
-
+		
+		//printing out each response catagory
 		for (int i = 0; i < numbers.size(); i++) {
 			l4dS = l4dS + numbers.get(i) + ": " + amount.get(i) + " responses";
 			if (i + 1 != numbers.size()) {
@@ -563,10 +572,9 @@ class Display extends JPanel implements ActionListener {
 			}
 		}
 
+		//more adding to screen
 		l4d.setText(l4dS);
-
 		add(l4b);
-
 		add(l4d);
 		add(l4c);
 
@@ -575,32 +583,19 @@ class Display extends JPanel implements ActionListener {
 	private static final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
 	private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 	private static final String TOKENS_DIRECTORY_PATH = "tokens";
-
-	/**
-	 * Global instance of the scopes required by this quickstart. If modifying these
-	 * scopes, delete your previously saved tokens/ folder.
-	 */
+	
 	private static final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS_READONLY);
 	private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
-
-	/**
-	 * Creates an authorized Credential object.
-	 * 
-	 * @param HTTP_TRANSPORT
-	 *            The network HTTP Transport.
-	 * @return An authorized Credential object.
-	 * @throws IOException
-	 *             If the credentials.json file cannot be found.
-	 */
+	
 	private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
-		// Load client secrets.
+		// Load client secrets
 		InputStream in = SheetsQuickstart.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
 		if (in == null) {
 			throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
 		}
 		GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
-		// Build flow and trigger user authorization request.
+		// Build flow and trigger user authorization request
 		GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
 				clientSecrets, SCOPES)
 						.setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
@@ -609,16 +604,13 @@ class Display extends JPanel implements ActionListener {
 		return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
 	}
 
-	/**
-	 * Prints the names and majors of students in a sample spreadsheet:
-	 * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
-	 */
 	public static void main(String... args) throws IOException, GeneralSecurityException, FileNotFoundException {
 		// Build a new authorized API client service.
 		SwingUtilities.invokeLater(() -> new SheetsQuickstart());
 
 	}
 
+	//simply changes a num to a char that is matched, alphanumerically
 	public static char checkLetter(int letter) {
 		switch (letter) {
 		case 0:
