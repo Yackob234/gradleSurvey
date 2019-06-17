@@ -489,7 +489,6 @@ class Display extends JPanel implements ActionListener {
 
 		for (int i = 0; i < split.length; i++) {
 			responses.add(split[i]);
-			System.out.println(responses.get(i));
 		}
 		// checks responses to create titles
 		for (int i = 0; i < responses.size(); i++) {
