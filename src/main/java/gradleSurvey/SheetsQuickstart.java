@@ -1,5 +1,13 @@
+//Medway Polling System By Rory Welch and Jacob Scott
+//June 17 2019
+/*This program uses the google sheets api to be able to read information stored in a google sheet.
+This program allows a user to create a google form and have the data be output and stored into a google sheet.
+Then, using a database to validate emails the program will take relevant data and output all validated results
+and display them to the user. The user only needs to input the link to their spreadsheet and then type in the question
+name and choose its question type.*/
 package gradleSurvey;
 
+//sheet api imports
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -14,6 +22,7 @@ import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
+//regular imports
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -41,7 +50,7 @@ public class SheetsQuickstart extends JFrame {
 
 	Display one;
 
-	//sets up the jframe, and the panel
+	// sets up the jframe, and the panel
 	public SheetsQuickstart() {
 		setTitle("Google Survey");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -53,7 +62,8 @@ public class SheetsQuickstart extends JFrame {
 		setVisible(true);
 
 	}
-	//puts the Jframe on the EDT, and calls the frame
+
+	// puts the Jframe on the EDT, and calls the frame
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(() -> new SheetsQuickstart());
 	}
@@ -79,7 +89,7 @@ class Display extends JPanel implements ActionListener {
 	final int HEIGHT = 400;
 
 	public Display() {
-		//loads the first page
+		// loads the first page
 		l1 = new JLabel("Welcome to Jacob and Rory's Medway Polling System!");
 		l1.setBounds(WIDTH / 2 - 175, HEIGHT / 8, 350, 25);
 		l1b = new JLabel(
@@ -118,14 +128,14 @@ class Display extends JPanel implements ActionListener {
 						e2.printStackTrace();
 					}
 					tf1.setText("Success!");
-					//if the spreadsheet exists, get logins, and validate the emails
+					// if the spreadsheet exists, get logins, and validate the emails
 					try {
 						user = userLogin(spreadsheetData);
 						user = validateEmails(spreadsheetData, student, user);
 					} catch (FileNotFoundException e1) {
 						e1.printStackTrace();
 					}
-					//runs the second screen
+					// runs the second screen
 					columnScreen();
 				}
 			}
@@ -133,7 +143,7 @@ class Display extends JPanel implements ActionListener {
 
 		} else if (e.getSource() == b2) {
 			boolean runOnce = true;
-			//searches for the question name, then continues onto next screen
+			// searches for the question name, then continues onto next screen
 			for (int i = 0; i < questions.length; i++) {
 				if (questions[i].equals(tf2.getText().toLowerCase()) && runOnce) {
 					currentColumn = i;
@@ -141,12 +151,13 @@ class Display extends JPanel implements ActionListener {
 					qNum = i + 1;
 					runOnce = false;
 					questionTypeScreen();
-				} 
+				}
 			}
 			tf2.setText("There was no Question with that name");
 
 			/*
-			 * the next if statements, all do the same, and just run the next screen respectivly
+			 * the next if statements, all do the same, and just run the next screen
+			 * respectivly
 			 */
 		} else if (e.getSource() == bCheckbox) {
 			questionType = 0;
@@ -162,7 +173,8 @@ class Display extends JPanel implements ActionListener {
 			answerScreenPrep();
 			linearScaleScreen(student, spreadsheetData);
 		} else if (e.getSource() == b4) {
-			//loops the program back to the column screen so the user can pick a new question to look at data for
+			// loops the program back to the column screen so the user can pick a new
+			// question to look at data for
 			columnScreen();
 			b4.setVisible(false);
 			l4.setVisible(false);
@@ -181,11 +193,12 @@ class Display extends JPanel implements ActionListener {
 
 	public List<List<Object>> collectData(String spreadsheetID, String num)
 			throws GeneralSecurityException, IOException {
-		//first the ending letter of the spreadsheet is found through collecting the number of questions at the begining of the program
+		// first the ending letter of the spreadsheet is found through collecting the
+		// number of questions at the begining of the program
 		numm = Integer.parseInt(num);
 		questions = new String[numm];
 		char rangeEnd = checkLetter(numm);
-		//its then added to the range string
+		// its then added to the range string
 		String rangeEndString = "" + rangeEnd;
 		rangeEndString = rangeEndString.toUpperCase();
 
@@ -193,9 +206,8 @@ class Display extends JPanel implements ActionListener {
 
 		String range = "Form Responses 1!B1:";
 		range += rangeEndString;
-		
-		
-		//this retrieves the spreadsheet and returns a List<List<Object>>
+
+		// this retrieves the spreadsheet and returns a List<List<Object>>
 		Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
 				.setApplicationName(APPLICATION_NAME).build();
 		ValueRange response = service.spreadsheets().values().get(spreadsheetID, range).execute();
@@ -204,6 +216,8 @@ class Display extends JPanel implements ActionListener {
 	}
 
 	public static usernames[] userLogin(List<List<Object>> values) {
+		// uses a vector to take and store all inputed usernames from the survey
+		// thus allowing them to be an object and have a validation boolean
 		Vector<String> names = new Vector();
 
 		for (List row : values) {
@@ -220,10 +234,12 @@ class Display extends JPanel implements ActionListener {
 
 	public static usernames[] validateEmails(List<List<Object>> values, Student[] students, usernames[] user)
 			throws FileNotFoundException {
+		// Gets all student info from database
 		students = getEmails("update.txt");
 		boolean ranOnce = false;
-
+		// runs until all columns have been checked
 		for (List row : values) {
+			// takes all data from the first row, giving us all the questions asked
 			if (!ranOnce) {
 				for (int i = 0; i < numm; i++) {
 					row.set(i, row.get(i).toString().toLowerCase());
@@ -232,6 +248,7 @@ class Display extends JPanel implements ActionListener {
 				ranOnce = true;
 			}
 			String email;
+			// creates the schools database student id's from info in database
 			for (int i = 0; i < user.length; i++) {
 				for (int j = 0; j < students.length; j++) {
 					int fNameLength = 4;
@@ -242,7 +259,7 @@ class Display extends JPanel implements ActionListener {
 					if (students[j].lName.length() < 4) {
 						lNameLength = students[j].lName.length();
 					}
-
+					// validates user if matches with database
 					if (user[i].Username.contentEquals(students[j].lName.substring(0, lNameLength)
 							+ students[j].fName.substring(0, fNameLength)
 							+ students[j].sNum.substring(students[j].sNum.length() - 3, students[j].sNum.length()))
@@ -258,7 +275,7 @@ class Display extends JPanel implements ActionListener {
 	}
 
 	public static Student[] getEmails(String fileName) throws FileNotFoundException {
-		//this method searches for each email in update.txt
+		// this method searches for each email in update.txt
 		File file = new File(fileName);
 		Scanner parser = new Scanner(new FileReader(file));
 
@@ -280,8 +297,8 @@ class Display extends JPanel implements ActionListener {
 			item[length - 1] = parser.nextLine();
 		}
 		Student[] stu = new Student[length];
-		
-		//splits up the line, into last name, first name, then student number
+
+		// splits up the line, into last name, first name, then student number
 		for (int i = 0; i < length; i++) {
 			stu[i] = new Student();
 			String[] items = item[i].split(",");
@@ -294,7 +311,7 @@ class Display extends JPanel implements ActionListener {
 
 	public void columnScreen() { // displays the second screen, where the user picks the column
 
-		//removing the old screen
+		// removing the old screen
 		b1.setVisible(false);
 		tf1.setVisible(false);
 		tf1b.setVisible(false);
@@ -306,7 +323,7 @@ class Display extends JPanel implements ActionListener {
 		remove(l1b);
 		remove(l1c);
 
-		//adding the new screen
+		// adding the new screen
 		tf2 = new JTextField("Enter the title of the Question you would like data for.");
 		tf2.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
 		b2 = new JButton("Confirm");
@@ -317,8 +334,9 @@ class Display extends JPanel implements ActionListener {
 	}
 
 	public void answerScreenPrep() {
-		//a general cleanup method, as all of the question types use these lines, the code is just condensed
-		//removing old screen
+		// a general cleanup method, as all of the question types use these lines, the
+		// code is just condensed
+		// removing old screen
 		l3.setVisible(false);
 		bCheckbox.setVisible(false);
 		bMultiChoice.setVisible(false);
@@ -329,7 +347,7 @@ class Display extends JPanel implements ActionListener {
 		remove(bMultiChoice);
 		remove(bLinearScale);
 
-		//adding new screen
+		// adding new screen
 		l4 = new JLabel(qName);
 		l4.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
 		b4 = new JButton("Done");
@@ -343,17 +361,17 @@ class Display extends JPanel implements ActionListener {
 	}
 
 	public void questionTypeScreen() {
-		//removing old screen
+		// removing old screen
 		b2.setVisible(false);
 		tf2.setVisible(false);
 		tf2.setText("invalid");
 		remove(b2);
 		remove(tf2);
-		
-		//adding new screen
+
+		// adding new screen
 		l3 = new JLabel("What type of Question is this?");
 		l3.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
-		
+
 		bCheckbox = new JButton("Checkbox");
 		bCheckbox.setBounds((WIDTH / 2 - 250), (HEIGHT / 2) - 25, 150, 50);
 		bCheckbox.addActionListener(this);
@@ -372,6 +390,8 @@ class Display extends JPanel implements ActionListener {
 	}
 
 	public void multiChoiceScreen(usernames[] user, List<List<Object>> values) {
+		// Checks how many users were in database and stores in an integer to display to
+		// user
 		int totalValid = 0;
 		for (int i = 0; i < user.length; i++) {
 			if (user[i].valid == true) {
@@ -379,27 +399,27 @@ class Display extends JPanel implements ActionListener {
 			}
 		}
 
-		
 		Vector<String> responses = new Vector();
 		Vector<String> titles = new Vector();
 		Vector<Integer> total = new Vector();
-
+		// stores all data for corresponding question in a vector
 		for (List row : values) {
 			responses.add((String) row.get(qNum - 1));
 		}
-
+		// removes the question from vector
 		responses.remove(0);
-
+		// adds the possible answers based on the responses and stores the answer once
+		// as a title
 		for (int i = 0; i < responses.size(); i++) {
 			if (!titles.contains(responses.get(i))) {
 				titles.add(responses.get(i));
 			}
 		}
-
+		// sets all values for each answer to zero
 		for (int j = 0; j < titles.size(); j++) {
 			total.add(0);
 		}
-
+		// if the title appears in responses its coresponding total increases by 1
 		for (int i = 0; i < user.length; i++) {
 			for (int j = 0; j < titles.size(); j++) {
 				if (user[i].valid == true) {
@@ -409,7 +429,7 @@ class Display extends JPanel implements ActionListener {
 				}
 			}
 		}
-
+		// creates the screen
 		l4b = new JLabel("Total Valid Entries: " + totalValid);
 		l4b.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 25, 500, 25);
 
@@ -426,6 +446,8 @@ class Display extends JPanel implements ActionListener {
 	}
 
 	public void checkBoxScreen(Student[] students, List<List<Object>> values) {
+		// Checks how many users were in database and stores in an integer to display to
+		// user
 		int totalValid = 0;
 		for (int i = 0; i < user.length; i++) {
 			if (user[i].valid == true) {
@@ -433,24 +455,30 @@ class Display extends JPanel implements ActionListener {
 			}
 		}
 
+		// vectors for data as we do not know the size needed
 		Vector<String> data = new Vector();
 		Vector<String> responses = new Vector();
 		Vector<String> titles = new Vector();
 		Vector<Integer> total = new Vector();
 		Vector<Integer> remove = new Vector();
-
+		// gets all data for corresponding question
 		for (List row : values) {
 			data.add((String) row.get(qNum - 1));
 		}
+		// removes the question from pulled data
 		data.remove(0);
+		// stores the value at where an invalid result is in a vector
 		for (int i = 0; i < data.size(); i++) {
 			if (user[i].valid == false) {
 				remove.add(i);
 			}
 		}
+		// removes the data from the response vector based on the removal values
 		for (int i = 0; i < remove.size(); i++) {
-			data.remove(remove.get(i)-i);
+			data.remove(remove.get(i) - i);
 		}
+		// takes the inputted data and splits it at every comma as multiple answers are
+		// allowed
 		String[] split = null;
 		String data1 = null;
 		for (int i = 0; i < data.size(); i++) {
@@ -463,17 +491,17 @@ class Display extends JPanel implements ActionListener {
 			responses.add(split[i]);
 			System.out.println(responses.get(i));
 		}
-
+		// checks responses to create titles
 		for (int i = 0; i < responses.size(); i++) {
 			if (!titles.contains(responses.get(i))) {
 				titles.add(responses.get(i));
 			}
 		}
-
+		// sets default values for every title to be 0
 		for (int j = 0; j < titles.size(); j++) {
 			total.add(0);
 		}
-
+		// increases every titles value if the response matches the title
 		for (int i = 0; i < responses.size(); i++) {
 			for (int j = 0; j < titles.size(); j++) {
 
@@ -483,7 +511,7 @@ class Display extends JPanel implements ActionListener {
 				}
 			}
 		}
-
+		// create the screen
 		l4b = new JLabel("Total Valid Entries: " + totalValid);
 		l4b.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 25, 500, 25);
 
@@ -507,30 +535,30 @@ class Display extends JPanel implements ActionListener {
 		Vector<Integer> numbers = new Vector();
 		Vector<Integer> amount = new Vector();
 		boolean notFound = true;
-		//changes the List<List<Object>> into a Vector<String>
+		// changes the List<List<Object>> into a Vector<String>
 		for (List row : values) {
 			responses.add((String) row.get(qNum - 1));
 		}
-		//removes the question in the vector of responses
+		// removes the question in the vector of responses
 		responses.remove(0);
 
 		for (int i = 0; i < user.length; i++) {
-			//if the user is valid, 
+			// if the user is valid,
 			if (user[i].valid) {
-				//add to total valid users
+				// add to total valid users
 				totalValid++;
-				//change response into double, and sum it
+				// change response into double, and sum it
 				double answer = Double.parseDouble(responses.get(i));
 				average += answer;
 
-				//if the number has already occured, add it to total
+				// if the number has already occured, add it to total
 				for (int j = 0; j < numbers.size(); j++) {
 					if (answer == numbers.get(j)) {
 						notFound = false;
 						amount.set(j, amount.get(j) + 1);
 					}
 				}
-				//if it hasn't, make a new int to represent it
+				// if it hasn't, make a new int to represent it
 				if (notFound) {
 					numbers.add((int) answer);
 					amount.add(1);
@@ -539,7 +567,7 @@ class Display extends JPanel implements ActionListener {
 		}
 		average = average / totalValid;
 
-		//adding new screen
+		// adding new screen
 		l4b = new JLabel("Total Valid Entries: " + totalValid);
 		l4b.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 25, 500, 50);
 		l4c = new JLabel("Average Response" + average);
@@ -550,7 +578,7 @@ class Display extends JPanel implements ActionListener {
 
 		String l4dS = "";
 
-		//sorting the list of responses
+		// sorting the list of responses
 		for (int i = 0; i < numbers.size() - 1; i++) {
 			if (numbers.get(i) > numbers.get(i + 1)) {
 				int storage = numbers.get(i);
@@ -563,8 +591,8 @@ class Display extends JPanel implements ActionListener {
 				i = -1;
 			}
 		}
-		
-		//printing out each response catagory
+
+		// printing out each response catagory
 		for (int i = 0; i < numbers.size(); i++) {
 			l4dS = l4dS + numbers.get(i) + ": " + amount.get(i) + " responses";
 			if (i + 1 != numbers.size()) {
@@ -572,7 +600,7 @@ class Display extends JPanel implements ActionListener {
 			}
 		}
 
-		//more adding to screen
+		// more adding to screen
 		l4d.setText(l4dS);
 		add(l4b);
 		add(l4d);
@@ -583,10 +611,10 @@ class Display extends JPanel implements ActionListener {
 	private static final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
 	private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 	private static final String TOKENS_DIRECTORY_PATH = "tokens";
-	
+
 	private static final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS_READONLY);
 	private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
-	
+
 	private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
 		// Load client secrets
 		InputStream in = SheetsQuickstart.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
@@ -610,7 +638,7 @@ class Display extends JPanel implements ActionListener {
 
 	}
 
-	//simply changes a num to a char that is matched, alphanumerically
+	// simply changes a num to a char that is matched, alphanumerically
 	public static char checkLetter(int letter) {
 		switch (letter) {
 		case 0:
