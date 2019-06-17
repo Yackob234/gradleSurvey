@@ -96,9 +96,9 @@ class Display extends JPanel implements ActionListener {
 				"Make sure to make the sheet public, and not apart of the TVDSB school board so anyone can access it");
 		l1b.setBounds(WIDTH / 2 - 300, HEIGHT * 3 / 4, 600, 25);
 		tf1 = new JTextField(
-				"https://docs.google.com/spreadsheets/d/1rrV69Qc-gmfagLKP2AII1xjrWqui6m1ejPeUHuvbrY0/edit#gid=1206381474");
+				"Enter the link to your Spreadsheet");
 		tf1.setBounds(WIDTH / 2 - 250, HEIGHT / 4, 500, 25);
-		tf1b = new JTextField("5");
+		tf1b = new JTextField("Enter the number of questions, including the username question");
 		tf1b.setBounds(WIDTH / 2 - 250, HEIGHT / 4 + 50, 500, 25);
 		l1c = new JLabel("Make sure to copy update.txt into the folder, GoogleSurvey");
 		l1c.setBounds(WIDTH / 2 - 250, HEIGHT / 3 + 50, 500, 25);
